@@ -34,7 +34,7 @@ const Hero = () => {
             size="lg"
             className="syncsure-bg-blue hover:bg-blue-700 text-white px-8 py-4 text-lg rounded-lg"
           >
-            Start 7-Day Free Trial
+            Get Started
           </Button>
           <Button 
             variant="outline" 
@@ -51,4 +51,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
