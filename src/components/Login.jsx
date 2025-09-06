@@ -23,16 +23,87 @@ const Login = () => {
     });
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Redirect to dashboard for demo purposes
-    window.location.href = '/dashboard';
+    
+    try {
+      console.log('Login attempt:', { email: formData.email, password: formData.password });
+      
+      const response = await fetch('https://syncsure-backend.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+      console.log('Login response:', data);
+
+      if (data.ok) {
+        // Store authentication token
+        localStorage.setItem('syncsure_token', data.token);
+        localStorage.setItem('syncsure_user', JSON.stringify(data.account));
+        
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
+      } else {
+        alert('Login failed: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Login failed: Network error');
+    }
   };
 
-  const handleCreateAccount = (e) => {
+  const handleCreateAccount = async (e) => {
     e.preventDefault();
-    // Handle account creation logic here
-    console.log('Creating account:', formData);
+    
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    try {
+      console.log('Creating account:', formData);
+      
+      const response = await fetch('https://syncsure-backend.onrender.com/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          companyName: formData.companyName
+        })
+      });
+
+      const data = await response.json();
+      console.log('Account creation response:', data);
+
+      if (data.ok) {
+        // Store authentication token
+        localStorage.setItem('syncsure_token', data.token);
+        localStorage.setItem('syncsure_user', JSON.stringify(data.account));
+        
+        alert('Account created successfully!');
+        
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
+      } else {
+        alert('Account creation failed: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Account creation error:', error);
+      alert('Account creation failed: Network error');
+    }
   };
 
   return (
