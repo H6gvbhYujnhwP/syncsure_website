@@ -9,11 +9,12 @@ const Header = () => {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Home', href: '/', type: 'route' },
-    { name: 'Features', href: '/features', type: 'route' },
-    { name: 'Pricing', href: '#pricing', type: 'anchor' },
-    { name: 'Help', href: '#help', type: 'anchor' },
-    { name: 'Login', href: '#login', type: 'anchor' },
+    { name: 'Home', href: '/' },
+    { name: 'Features', href: '/features' },
+    { name: 'Pricing', href: '/pricing' },
+    { name: 'Help', href: '/help' },
+    { name: 'About', href: '/about' },
+    { name: 'Login', href: '/login' },
   ];
 
   return (
@@ -21,7 +22,7 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center">
+          <Link to="/" className="flex items-center">
             <img 
               src={syncSureLogo} 
               alt="SyncSure" 
@@ -30,44 +31,58 @@ const Header = () => {
             <span className="text-xl font-semibold text-gray-900">
               SyncSure <span className="text-blue-600 font-normal">cloud</span>
             </span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navigation.slice(0, -2).map((item) => (
-              item.type === 'route' ? (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium"
-                >
-                  {item.name}
-                </Link>
-              ) : (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium"
-                >
-                  {item.name}
-                </a>
-              )
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`nav-link px-3 py-2 text-sm font-medium transition-colors ${
+                  location.pathname === item.href
+                    ? 'text-blue-600'
+                    : 'text-gray-600 hover:text-blue-600'
+                }`}
+              >
+                {item.name}
+              </Link>
             ))}
-            <a
-              href="#help"
-              className="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium"
+            <Link
+              to="/help"
+              className={`nav-link px-3 py-2 text-sm font-medium transition-colors ${
+                location.pathname === '/help'
+                  ? 'text-blue-600'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
             >
               Help
-            </a>
-            <a
-              href="#login"
-              className="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium"
+            </Link>
+            <Link
+              to="/about"
+              className={`nav-link px-3 py-2 text-sm font-medium transition-colors ${
+                location.pathname === '/about'
+                  ? 'text-blue-600'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
+            >
+              About
+            </Link>
+            <Link
+              to="/login"
+              className={`nav-link px-3 py-2 text-sm font-medium transition-colors ${
+                location.pathname === '/login'
+                  ? 'text-blue-600'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
             >
               Login
-            </a>
-            <Button className="syncsure-bg-blue hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
-              Start Free Trial
-            </Button>
+            </Link>
+            <Link to="/pricing">
+              <Button className="syncsure-bg-blue hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                Start Free Trial
+              </Button>
+            </Link>
           </nav>
 
           {/* Mobile menu button */}
@@ -86,29 +101,24 @@ const Header = () => {
           <div className="md:hidden border-t border-gray-200 py-4">
             <div className="flex flex-col space-y-4">
               {navigation.map((item) => (
-                item.type === 'route' ? (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className="text-gray-600 hover:text-blue-600 px-3 py-2 text-base font-medium"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                ) : (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="text-gray-600 hover:text-blue-600 px-3 py-2 text-base font-medium"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
-                  </a>
-                )
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`px-3 py-2 text-base font-medium transition-colors ${
+                    location.pathname === item.href
+                      ? 'text-blue-600'
+                      : 'text-gray-600 hover:text-blue-600'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
               ))}
-              <Button className="syncsure-bg-blue hover:bg-blue-700 text-white px-6 py-2 rounded-lg mx-3 mt-4">
-                Start Free Trial
-              </Button>
+              <Link to="/pricing" onClick={() => setIsMenuOpen(false)}>
+                <Button className="syncsure-bg-blue hover:bg-blue-700 text-white px-6 py-2 rounded-lg mx-3 mt-4">
+                  Start Free Trial
+                </Button>
+              </Link>
             </div>
           </div>
         )}

@@ -1,23 +1,24 @@
+import { Link } from 'react-router-dom';
 import syncSureLogo from '../assets/Syncsure_Logo_1.png';
 
 const Footer = () => {
   const productLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'Features', href: '#features' },
-    { name: 'Pricing', href: '#pricing' }
+    { name: 'Home', href: '/' },
+    { name: 'Features', href: '/features' },
+    { name: 'Pricing', href: '/pricing' }
   ];
 
   const supportLinks = [
-    { name: 'Help Center', href: '#help' },
+    { name: 'Help Center', href: '/help' },
     { name: 'Documentation', href: '#docs' },
     { name: 'Contact Us', href: '#contact' },
     { name: 'Status Page', href: '#status' }
   ];
 
   const companyLinks = [
-    { name: 'About', href: '#about' },
-    { name: 'Privacy', href: '#privacy' },
-    { name: 'Terms', href: '#terms' }
+    { name: 'About', href: '/about' },
+    { name: 'Privacy', href: '/privacy' },
+    { name: 'Terms', href: '/terms' }
   ];
 
   return (
@@ -47,12 +48,12 @@ const Footer = () => {
             <ul className="space-y-2">
               {productLinks.map((link) => (
                 <li key={link.name}>
-                  <a 
-                    href={link.href}
-                    className="text-gray-400 hover:text-white text-sm transition-colors"
+                  <Link 
+                    to={link.href}
+                    className="text-gray-400 hover:text-white transition-colors text-sm"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -64,12 +65,21 @@ const Footer = () => {
             <ul className="space-y-2">
               {supportLinks.map((link) => (
                 <li key={link.name}>
-                  <a 
-                    href={link.href}
-                    className="text-gray-400 hover:text-white text-sm transition-colors"
-                  >
-                    {link.name}
-                  </a>
+                  {link.href.startsWith('/') ? (
+                    <Link 
+                      to={link.href}
+                      className="text-gray-400 hover:text-white transition-colors text-sm"
+                    >
+                      {link.name}
+                    </Link>
+                  ) : (
+                    <a 
+                      href={link.href}
+                      className="text-gray-400 hover:text-white transition-colors text-sm"
+                    >
+                      {link.name}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -81,30 +91,32 @@ const Footer = () => {
             <ul className="space-y-2">
               {companyLinks.map((link) => (
                 <li key={link.name}>
-                  <a 
-                    href={link.href}
-                    className="text-gray-400 hover:text-white text-sm transition-colors"
+                  <Link 
+                    to={link.href}
+                    className="text-gray-400 hover:text-white transition-colors text-sm"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
-            © 2025 SyncSure. All rights reserved.
-          </p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#privacy" className="text-gray-400 hover:text-white text-sm">
-              Privacy Policy
-            </a>
-            <a href="#terms" className="text-gray-400 hover:text-white text-sm">
-              Terms of Service
-            </a>
+        {/* Bottom Section */}
+        <div className="border-t border-gray-700 mt-8 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 text-sm">
+              © 2025 SyncSure. All rights reserved.
+            </p>
+            <div className="flex space-x-6 mt-4 md:mt-0">
+              <Link to="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Terms of Service
+              </Link>
+            </div>
           </div>
         </div>
       </div>
