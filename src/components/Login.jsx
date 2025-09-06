@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import syncSureLogo from '../assets/Syncsure_Logo_1.png';
 
@@ -37,6 +38,17 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      {/* Back to Home Link */}
+      <div className="absolute top-6 left-6">
+        <Link 
+          to="/" 
+          className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft size={20} className="mr-2" />
+          <span className="text-sm font-medium">Back to Home</span>
+        </Link>
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <img 
@@ -337,4 +349,3 @@ const Login = () => {
 };
 
 export default Login;
-
