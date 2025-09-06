@@ -78,11 +78,6 @@ const Header = () => {
             >
               Login
             </Link>
-            <Link to="/pricing">
-              <Button className="syncsure-bg-blue hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
-                Start Free Trial
-              </Button>
-            </Link>
           </nav>
 
           {/* Mobile menu button */}
@@ -114,11 +109,6 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
-              <Link to="/pricing" onClick={() => setIsMenuOpen(false)}>
-                <Button className="syncsure-bg-blue hover:bg-blue-700 text-white px-6 py-2 rounded-lg mx-3 mt-4">
-                  Start Free Trial
-                </Button>
-              </Link>
             </div>
           </div>
         )}
@@ -128,4 +118,3 @@ const Header = () => {
 };
 
 export default Header;
-

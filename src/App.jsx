@@ -1,96 +1,92 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './App.css';
-
-// Components
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Features from './components/Features';
 import FeaturesPage from './components/FeaturesPage';
-import Login from './components/Login';
 import Pricing from './components/Pricing';
+import Footer from './components/Footer';
+import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Help from './components/Help';
 import About from './components/About';
 import Privacy from './components/Privacy';
 import Terms from './components/Terms';
-import Footer from './components/Footer';
-
-// Home Page Component
-const HomePage = () => (
-  <>
-    <Hero />
-    <Features />
-  </>
-);
+import './App.css';
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-white">
+      <div className="App">
         <Routes>
-          {/* Public Pages with Header/Footer */}
+          {/* Home Page */}
           <Route path="/" element={
             <>
               <Header />
-              <main><HomePage /></main>
+              <Hero />
+              <Features />
               <Footer />
             </>
           } />
-          <Route path="/home" element={
-            <>
-              <Header />
-              <main><HomePage /></main>
-              <Footer />
-            </>
-          } />
+          
+          {/* Login Page */}
+          <Route path="/login" element={<Login />} />
+          
+          {/* Dashboard Page */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* Features Page */}
           <Route path="/features" element={
             <>
               <Header />
-              <main><FeaturesPage /></main>
+              <FeaturesPage />
               <Footer />
             </>
           } />
+          
+          {/* Pricing Page */}
           <Route path="/pricing" element={
             <>
               <Header />
-              <main><Pricing /></main>
+              <Pricing />
               <Footer />
             </>
           } />
+          
+          {/* Help Page */}
           <Route path="/help" element={
             <>
               <Header />
-              <main><Help /></main>
+              <Help />
               <Footer />
             </>
           } />
+          
+          {/* About Page */}
           <Route path="/about" element={
             <>
               <Header />
-              <main><About /></main>
+              <About />
               <Footer />
             </>
           } />
+          
+          {/* Privacy Page */}
           <Route path="/privacy" element={
             <>
               <Header />
-              <main><Privacy /></main>
+              <Privacy />
               <Footer />
             </>
           } />
+          
+          {/* Terms Page */}
           <Route path="/terms" element={
             <>
               <Header />
-              <main><Terms /></main>
+              <Terms />
               <Footer />
             </>
           } />
-          
-          {/* Authentication Pages (No Header/Footer) */}
-          <Route path="/login" element={<Login />} />
-          
-          {/* Protected Pages (No Header/Footer - Dashboard has its own header) */}
-          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </div>
     </Router>
@@ -98,4 +94,3 @@ function App() {
 }
 
 export default App;
-

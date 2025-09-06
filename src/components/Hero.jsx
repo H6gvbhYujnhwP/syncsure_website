@@ -1,4 +1,5 @@
 import { Play } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import syncSureLogo from '../assets/Syncsure_Logo_1.png';
 
@@ -30,12 +31,14 @@ const Hero = () => {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button 
-            size="lg"
-            className="syncsure-bg-blue hover:bg-blue-700 text-white px-8 py-4 text-lg rounded-lg"
-          >
-            Start 7-Day Free Trial
-          </Button>
+          <Link to="/login">
+            <Button 
+              size="lg"
+              className="syncsure-bg-blue hover:bg-blue-700 text-white px-8 py-4 text-lg rounded-lg"
+            >
+              Get Started
+            </Button>
+          </Link>
           <Button 
             variant="outline" 
             size="lg"
@@ -51,4 +54,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
