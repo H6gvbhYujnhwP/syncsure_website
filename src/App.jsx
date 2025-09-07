@@ -5,7 +5,7 @@ import Features from './components/Features';
 import FeaturesPage from './components/FeaturesPage';
 import Pricing from './components/Pricing';
 import Footer from './components/Footer';
-import Login from './components/Login';
+import LoginFixed from './components/LoginFixed';
 import Dashboard from './components/Dashboard';
 import Help from './components/Help';
 import About from './components/About';
@@ -29,7 +29,7 @@ function App() {
           } />
           
           {/* Login Page */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<LoginFixed />} />
           
           {/* Dashboard Page */}
           <Route path="/dashboard" element={<Dashboard />} />
