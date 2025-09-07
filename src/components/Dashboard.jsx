@@ -188,6 +188,216 @@ Write-Host "SyncSure Agent installed successfully with license: ${build.license_
   );
 };
 
+// Billing Section Component
+const BillingSection = ({ userEmail }) => {
+  const [loading, setLoading] = useState(false);
+  const [subscriptionData, setSubscriptionData] = useState(null);
+
+  useEffect(() => {
+    fetchSubscriptionData();
+  }, []);
+
+  const fetchSubscriptionData = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/stripe/subscription`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSubscriptionData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching subscription data:', error);
+    }
+  };
+
+  const handlePurchaseLicense = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/stripe/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          priceId: 'price_1QFqKdP5zKbGZWhOjmhJdqzl', // Your Stripe price ID
+          successUrl: `${window.location.origin}/dashboard?success=true`,
+          cancelUrl: `${window.location.origin}/dashboard?canceled=true`
+        })
+      });
+
+      if (response.ok) {
+        const { url } = await response.json();
+        window.location.href = url; // Redirect to Stripe Checkout
+      } else {
+        alert('Failed to create checkout session. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Current Subscription Status */}
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Current Subscription</h3>
+        
+        {subscriptionData?.active ? (
+          <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+            <div className="flex items-center">
+              <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+              <div>
+                <p className="font-medium text-green-900">Active Subscription</p>
+                <p className="text-sm text-green-700">SyncSure Monitor - £1.99/month</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-green-700">Next billing: {subscriptionData.nextBilling}</p>
+              <p className="text-sm text-green-700">Licenses: {subscriptionData.licenseCount}</p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-center">
+              <AlertCircle className="h-5 w-5 text-gray-500 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">No Active Subscription</p>
+                <p className="text-sm text-gray-600">Purchase a license to start monitoring your devices</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* License Purchase */}
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Purchase License</h3>
+        
+        <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h4 className="text-lg font-medium text-blue-900">SyncSure Monitor</h4>
+              <p className="text-sm text-blue-700">Professional OneDrive monitoring for MSPs</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-blue-900">£1.99</p>
+              <p className="text-sm text-blue-700">per month</p>
+            </div>
+          </div>
+          
+          <div className="space-y-2 mb-6">
+            <div className="flex items-center text-sm text-blue-700">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              <span>Unlimited device monitoring</span>
+            </div>
+            <div className="flex items-center text-sm text-blue-700">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              <span>Real-time sync status tracking</span>
+            </div>
+            <div className="flex items-center text-sm text-blue-700">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              <span>Custom agent with embedded license</span>
+            </div>
+            <div className="flex items-center text-sm text-blue-700">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              <span>PowerShell deployment scripts</span>
+            </div>
+            <div className="flex items-center text-sm text-blue-700">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              <span>Dashboard monitoring & alerts</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handlePurchaseLicense}
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Processing...
+              </>
+            ) : (
+              <>
+                <CreditCard className="h-4 w-4 mr-2" />
+                Purchase License
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* License Management */}
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">License Management</h3>
+        
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div>
+              <p className="font-medium text-gray-900">Active Licenses</p>
+              <p className="text-sm text-gray-600">Currently purchased and active</p>
+            </div>
+            <div className="text-2xl font-bold text-gray-900">
+              {subscriptionData?.licenseCount || 0}
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div>
+              <p className="font-medium text-gray-900">Devices Monitored</p>
+              <p className="text-sm text-gray-600">Devices currently using SyncSure agent</p>
+            </div>
+            <div className="text-2xl font-bold text-gray-900">
+              {subscriptionData?.deviceCount || 0}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Billing History */}
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Billing History</h3>
+        
+        {subscriptionData?.invoices?.length > 0 ? (
+          <div className="space-y-3">
+            {subscriptionData.invoices.map((invoice, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900">{invoice.description}</p>
+                  <p className="text-sm text-gray-600">{invoice.date}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-medium text-gray-900">£{invoice.amount}</p>
+                  <p className="text-sm text-green-600">{invoice.status}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500">No billing history yet</p>
+            <p className="text-sm text-gray-400">Your invoices will appear here after purchase</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -568,8 +778,15 @@ const Dashboard = () => {
           </div>
         )}
 
+        {/* Billing & Seats Section */}
+        {activeSection === 'billing' && (
+          <div className="p-6">
+            <BillingSection userEmail={userData.email} />
+          </div>
+        )}
+
         {/* Other sections placeholder */}
-        {activeSection !== 'dashboard' && (
+        {activeSection !== 'dashboard' && activeSection !== 'billing' && (
           <div className="p-6">
             <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
               <h3 className="text-lg font-medium text-gray-900 mb-2">
