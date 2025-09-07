@@ -2,14 +2,14 @@
 
 This file is used to trigger frontend redeployments when needed.
 
-Last update: 2025-09-07 09:05 UTC
-Reason: DEBUG - Add comprehensive logging to identify login failure point
+Last update: 2025-09-07 09:15 UTC
+Reason: CACHE-BUST - Force fresh deployment with environment variables
 
-Added debug console.log statements to identify exactly where the handleLogin function is failing:
-1. "Login attempt:" - ✅ Working (we see this)
-2. "Validation failed – missing fields" - Check if validation is failing
-3. "Sending login request to:" - Check if fetch is reached
-4. "Got response:" - Check if backend responds
+CRITICAL FIXES:
+1. Added .env.production with VITE_API_BASE environment variable
+2. Updated Login.jsx to use configurable API base URL
+3. Removed onClick handler - keeping only onSubmit for clean event handling
+4. Force cache-busting deployment to ensure latest code is deployed
 
-Also added onClick={handleLogin} to button for defensive programming.
+BUILD STAMP: v2025.09.07.0915 - Environment Configuration Update
 

@@ -38,7 +38,8 @@ const Login = () => {
       console.log('Validation passed, preparing API call...');
       
       try {
-        const API_URL = 'https://syncsure-backend.onrender.com/api/auth/login';
+        const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:10000';
+        const API_URL = `${API_BASE}/api/auth/login`;
         console.log('Sending login request to:', API_URL);
         
         const response = await fetch(API_URL, {
@@ -250,7 +251,6 @@ const Login = () => {
                 <div>
                   <Button
                     type="submit"
-                    onClick={handleLogin}
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     Sign in
