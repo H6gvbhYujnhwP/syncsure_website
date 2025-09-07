@@ -101,10 +101,11 @@ const Dashboard = () => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  // Dashboard stats - placeholder data
+  // Dashboard stats - updated for new customers
   const stats = {
-    activeLicenses: 1,
-    totalSeats: 10,
+    activeLicenses: 0, // New customers start with 0 licenses
+    purchasedSeats: 5, // Example: purchased 5 seats
+    usedSeats: 3, // Example: used 3 seats
     activeDevices: 0,
     healthyDevices: 0
   };
@@ -235,8 +236,8 @@ const Dashboard = () => {
                     <Users className="h-8 w-8 text-blue-600" />
                   </div>
                   <div className="ml-4">
-                    <div className="text-2xl font-bold text-gray-900">{stats.totalSeats}</div>
-                    <div className="text-sm text-gray-500">Total Seats</div>
+                    <div className="text-2xl font-bold text-gray-900">{stats.usedSeats} of {stats.purchasedSeats}</div>
+                    <div className="text-sm text-gray-500">Used Seats</div>
                   </div>
                 </div>
               </div>
