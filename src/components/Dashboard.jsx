@@ -1,24 +1,191 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Monitor, 
+  BarChart3, 
   Users, 
-  Shield, 
   AlertTriangle, 
-  AlertCircle, 
-  Plus, 
+  Shield, 
+  Activity, 
+  FileText, 
   Search, 
+  Plus,
   Download,
+  ExternalLink,
+  Clock,
+  CheckCircle,
+  AlertCircle,
   Settings,
   CreditCard,
-  FileText,
-  LogOut,
-  BarChart3,
-  CheckCircle,
-  Activity
+  LogOut
 } from 'lucide-react';
 import { Button } from './ui/button';
 import syncSureLogo from '../assets/Syncsure_Logo_1.png';
+
+// Downloads Section Component
+const DownloadsSection = ({ userEmail }) => {
+  const [builds, setBuilds] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBuilds();
+  }, [userEmail]);
+
+  const fetchBuilds = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/builds/customer/${encodeURIComponent(userEmail)}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setBuilds(data.builds);
+      }
+    } catch (error) {
+      console.error('Error fetching builds:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'released':
+        return <CheckCircle className="h-5 w-5 text-green-600" />;
+      case 'building':
+        return <Clock className="h-5 w-5 text-yellow-600" />;
+      case 'queued':
+        return <Clock className="h-5 w-5 text-blue-600" />;
+      case 'failed':
+        return <AlertCircle className="h-5 w-5 text-red-600" />;
+      default:
+        return <Clock className="h-5 w-5 text-gray-600" />;
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'released':
+        return 'Ready for Download';
+      case 'building':
+        return 'Building...';
+      case 'queued':
+        return 'Queued';
+      case 'failed':
+        return 'Failed';
+      default:
+        return status;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Your Downloads</h3>
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Loading downloads...</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Your Downloads</h3>
+      
+      {builds.length === 0 ? (
+        <div className="text-center py-8">
+          <Download className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500 mb-2">No downloads available yet</p>
+          <p className="text-sm text-gray-400">Your SyncSure agent will appear here after purchase</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {builds.map((build) => (
+            <div key={build.id} className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  {getStatusIcon(build.status)}
+                  <div>
+                    <h4 className="font-medium text-gray-900">
+                      SyncSure Agent {build.tag}
+                    </h4>
+                    <p className="text-sm text-gray-500">
+                      License: {build.license_key} • Max Devices: {build.max_devices}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Status: {getStatusText(build.status)}
+                    </p>
+                  </div>
+                </div>
+                
+                {build.status === 'released' && build.release_url && (
+                  <div className="flex space-x-2">
+                    <a
+                      href={build.release_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download .exe
+                    </a>
+                    <button
+                      onClick={() => {
+                        // Generate PowerShell script for bulk deployment
+                        const psScript = `# SyncSure Agent Bulk Deployment Script
+# License: ${build.license_key}
+# Download URL: ${build.release_url}
+
+# Download and install SyncSure Agent
+$url = "${build.release_url}"
+$output = "$env:TEMP\\SyncSureAgent.exe"
+Invoke-WebRequest -Uri $url -OutFile $output
+Start-Process -FilePath $output -ArgumentList "/S" -Wait
+Write-Host "SyncSure Agent installed successfully with license: ${build.license_key}"`;
+                        
+                        const blob = new Blob([psScript], { type: 'text/plain' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `syncsure-deploy-${build.tag}.ps1`;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                      }}
+                      className="inline-flex items-center px-3 py-2 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      PowerShell Script
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {build.status === 'building' && (
+                <div className="mt-3">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                    <p className="text-sm text-yellow-800">
+                      Your custom SyncSure agent is being built. This usually takes 2-3 minutes.
+                      You'll receive an email when it's ready for download.
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {build.status === 'queued' && (
+                <div className="mt-3">
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                    <p className="text-sm text-blue-800">
+                      Your build request has been queued and will start processing shortly.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -297,6 +464,9 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
+
+            {/* Downloads Section */}
+            <DownloadsSection userEmail={userData.email} />
 
             {/* Device Health Chart and Recent Events */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
