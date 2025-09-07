@@ -78,7 +78,10 @@ const Dashboard = () => {
           companyName: user.companyName || 'SYNC-TEST-123',
           email: user.email || 'test@syncsure.com',
           firstName: user.firstName || 'Test',
-          lastName: user.lastName || 'User'
+          lastName: user.lastName || 'User',
+          // License and device data - in real implementation, this comes from API
+          purchasedLicenses: user.purchasedLicenses || 10, // Example: customer purchased 10 licenses
+          activeDevices: user.activeDevices || 7 // Example: 7 devices currently being monitored
         };
       }
     } catch (error) {
@@ -88,7 +91,10 @@ const Dashboard = () => {
       companyName: 'SYNC-TEST-123',
       email: 'test@syncsure.com',
       firstName: 'Test',
-      lastName: 'User'
+      lastName: 'User',
+      // Default values for new customers
+      purchasedLicenses: 0, // New customers start with 0 purchased licenses
+      activeDevices: 0 // New customers have 0 devices being monitored
     };
   };
 
@@ -101,13 +107,33 @@ const Dashboard = () => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  // Dashboard stats - updated for new customers
+  // Get dynamic license and device data
+  const getLicenseData = () => {
+    // In a real implementation, this would fetch from API
+    // For now, we'll use placeholder logic that can be easily replaced
+    
+    // This should come from user's account data
+    const purchasedLicenses = userData.purchasedLicenses || 0; // Number of licenses purchased
+    
+    // This should come from device monitoring API
+    const activeDevices = userData.activeDevices || 0; // Number of devices being monitored
+    
+    return {
+      purchasedLicenses,
+      activeDevices,
+      // Calculate if customer has active licenses (purchased > 0)
+      hasActiveLicenses: purchasedLicenses > 0 ? purchasedLicenses : 0
+    };
+  };
+
+  const licenseData = getLicenseData();
+
+  // Dashboard stats - dynamic calculation
   const stats = {
-    activeLicenses: 0, // New customers start with 0 licenses
-    purchasedSeats: 5, // Example: purchased 5 seats
-    usedSeats: 3, // Example: used 3 seats
-    activeDevices: 0,
-    healthyDevices: 0
+    activeLicenses: licenseData.hasActiveLicenses, // Shows purchased licenses or 0 for new customers
+    purchasedLicenses: licenseData.purchasedLicenses, // Total licenses purchased
+    activeDevices: licenseData.activeDevices, // Devices currently being monitored
+    healthyDevices: licenseData.activeDevices // For now, assume all active devices are healthy
   };
 
   const sidebarItems = [
@@ -236,8 +262,10 @@ const Dashboard = () => {
                     <Users className="h-8 w-8 text-blue-600" />
                   </div>
                   <div className="ml-4">
-                    <div className="text-2xl font-bold text-gray-900">{stats.usedSeats} of {stats.purchasedSeats}</div>
-                    <div className="text-sm text-gray-500">Used Seats</div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {stats.activeDevices} of {stats.purchasedLicenses}
+                    </div>
+                    <div className="text-sm text-gray-500">Used Licenses</div>
                   </div>
                 </div>
               </div>
