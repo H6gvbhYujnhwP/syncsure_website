@@ -16,7 +16,8 @@ import {
   AlertCircle,
   Settings,
   CreditCard,
-  LogOut
+  LogOut,
+  Monitor
 } from 'lucide-react';
 import { Button } from './ui/button';
 import syncSureLogo from '../assets/Syncsure_Logo_1.png';
