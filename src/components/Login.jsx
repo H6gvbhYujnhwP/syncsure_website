@@ -25,10 +25,20 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     
+    console.log('Login attempt:', { email: formData.email, password: formData.password });
+    
+    const { email, password } = formData;
+    if (!email || !password) {
+      console.log('Validation failed – missing fields');
+      alert('Please fill in both email and password.');
+      return;
+    }
+    
     try {
-      console.log('Login attempt:', { email: formData.email, password: formData.password });
+      const API_URL = 'https://syncsure-backend.onrender.com/api/auth/login';
+      console.log('Sending login request to:', API_URL);
       
-      const response = await fetch('https://syncsure-backend.onrender.com/api/auth/login', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,6 +50,7 @@ const Login = () => {
       });
 
       const data = await response.json();
+      console.log('Got response:', response.status);
       console.log('Login response:', data);
 
       if (data.ok) {
@@ -232,6 +243,7 @@ const Login = () => {
                 <div>
                   <Button
                     type="submit"
+                    onClick={handleLogin}
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     Sign in
