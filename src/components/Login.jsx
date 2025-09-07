@@ -23,49 +23,56 @@ const Login = () => {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    
-    console.log('Login attempt:', { email: formData.email, password: formData.password });
-    
-    const { email, password } = formData;
-    if (!email || !password) {
-      console.log('Validation failed – missing fields');
-      alert('Please fill in both email and password.');
-      return;
-    }
-    
     try {
-      const API_URL = 'https://syncsure-backend.onrender.com/api/auth/login';
-      console.log('Sending login request to:', API_URL);
+      e.preventDefault();
       
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      });
-
-      const data = await response.json();
-      console.log('Got response:', response.status);
-      console.log('Login response:', data);
-
-      if (data.ok) {
-        // Store authentication token
-        localStorage.setItem('syncsure_token', data.token);
-        localStorage.setItem('syncsure_user', JSON.stringify(data.account));
-        
-        // Redirect to dashboard
-        window.location.href = '/dashboard';
-      } else {
-        alert('Login failed: ' + data.error);
+      console.log('Login attempt:', { email: formData.email, password: formData.password });
+      
+      const { email, password } = formData;
+      if (!email || !password) {
+        console.log('Validation failed – missing fields');
+        alert('Please fill in both email and password.');
+        return;
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Login failed: Network error');
+      
+      console.log('Validation passed, preparing API call...');
+      
+      try {
+        const API_URL = 'https://syncsure-backend.onrender.com/api/auth/login';
+        console.log('Sending login request to:', API_URL);
+        
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password
+          })
+        });
+
+        const data = await response.json();
+        console.log('Got response:', response.status);
+        console.log('Login response:', data);
+
+        if (data.ok) {
+          // Store authentication token
+          localStorage.setItem('syncsure_token', data.token);
+          localStorage.setItem('syncsure_user', JSON.stringify(data.account));
+          
+          // Redirect to dashboard
+          window.location.href = '/dashboard';
+        } else {
+          alert('Login failed: ' + data.error);
+        }
+      } catch (networkError) {
+        console.error('Network error during login:', networkError);
+        alert('Login failed: Network error - ' + networkError.message);
+      }
+    } catch (generalError) {
+      console.error('General error in handleLogin:', generalError);
+      alert('Login failed: Unexpected error - ' + generalError.message);
     }
   };
 
