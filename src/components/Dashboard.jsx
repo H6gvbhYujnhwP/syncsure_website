@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Monitor, 
   Users, 
@@ -18,16 +19,73 @@ import { Button } from './ui/button';
 import syncSureLogo from '../assets/Syncsure_Logo_1.png';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('dashboard');
   const [showAddDeviceModal, setShowAddDeviceModal] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock user data
-  const userData = {
-    companyName: 'SYNC-TEST-123',
-    email: 'admin@sync-test-123.com',
-    firstName: 'John',
-    lastName: 'Smith'
+  // Check authentication on component mount
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('syncsure_token');
+      const userStr = localStorage.getItem('syncsure_user');
+      
+      if (token && userStr) {
+        try {
+          JSON.parse(userStr); // Validate user data
+          setIsAuthenticated(true);
+        } catch (error) {
+          console.error('Invalid user data:', error);
+          localStorage.removeItem('syncsure_token');
+          localStorage.removeItem('syncsure_user');
+          navigate('/login');
+        }
+      } else {
+        navigate('/login');
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [navigate]);
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render dashboard if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // Get user data from localStorage
+  const getUserData = () => {
+    try {
+      const userStr = localStorage.getItem('syncsure_user');
+      if (userStr) {
+        return JSON.parse(userStr);
+      }
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+    }
+    return {
+      companyName: 'Unknown Company',
+      email: 'unknown@example.com',
+      firstName: 'Unknown',
+      lastName: 'User'
+    };
   };
+
+  const userData = getUserData();
 
   // Mock dashboard stats
   const stats = {
@@ -51,7 +109,12 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
-    window.location.href = '/login';
+    // Clear authentication data
+    localStorage.removeItem('syncsure_token');
+    localStorage.removeItem('syncsure_user');
+    
+    // Navigate to login page
+    navigate('/login');
   };
 
   const downloadAgent = () => {

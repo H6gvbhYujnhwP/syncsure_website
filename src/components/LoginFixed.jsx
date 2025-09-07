@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const LoginFixed = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -50,7 +52,7 @@ const LoginFixed = () => {
         localStorage.setItem('syncsure_user', JSON.stringify(data.account));
         
         // Redirect to dashboard
-        window.location.href = '/dashboard';
+        navigate('/dashboard');
       } else {
         console.log('❌ Login failed:', data.error);
         alert('Login failed: ' + (data.error || 'Unknown error'));
