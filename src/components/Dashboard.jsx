@@ -80,8 +80,9 @@ const Dashboard = () => {
           firstName: user.firstName || 'Test',
           lastName: user.lastName || 'User',
           // License and device data - in real implementation, this comes from API
-          purchasedLicenses: user.purchasedLicenses || 10, // Example: customer purchased 10 licenses
-          activeDevices: user.activeDevices || 7 // Example: 7 devices currently being monitored
+          // ALL NEW CUSTOMERS START WITH 0 LICENSES AND 0 DEVICES
+          purchasedLicenses: user.purchasedLicenses || 0, // New customers start with 0 purchased licenses
+          activeDevices: user.activeDevices || 0 // New customers have 0 devices being monitored
         };
       }
     } catch (error) {
@@ -92,7 +93,7 @@ const Dashboard = () => {
       email: 'test@syncsure.com',
       firstName: 'Test',
       lastName: 'User',
-      // Default values for new customers
+      // Default values for new customers - ALWAYS START WITH 0
       purchasedLicenses: 0, // New customers start with 0 purchased licenses
       activeDevices: 0 // New customers have 0 devices being monitored
     };
