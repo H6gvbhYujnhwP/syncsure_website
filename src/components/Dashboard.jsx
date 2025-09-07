@@ -159,11 +159,11 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-sm border-r border-gray-200 flex flex-col">
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
+      {/* Fixed Sidebar */}
+      <div className="w-64 bg-white shadow-sm border-r border-gray-200 flex flex-col h-full">
         {/* Logo */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center">
             <img 
               src={syncSureLogo} 
@@ -177,8 +177,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 mt-6">
+        {/* Navigation - Scrollable if needed */}
+        <nav className="flex-1 mt-6 overflow-y-auto">
           {sidebarItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -198,8 +198,8 @@ const Dashboard = () => {
           })}
         </nav>
 
-        {/* User Profile */}
-        <div className="p-4 border-t border-gray-200 bg-white">
+        {/* User Profile - Always at bottom */}
+        <div className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
           <div className="flex items-center">
             <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
               <span className="text-blue-600 font-medium text-sm">
@@ -221,10 +221,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
+      {/* Main Content - Scrollable */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* Header - Fixed at top */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900">Dashboard Overview</h1>
@@ -239,11 +239,13 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Dashboard Content */}
-        {activeSection === 'dashboard' && (
-          <div className="p-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Dashboard Content */}
+          {activeSection === 'dashboard' && (
+            <div className="p-6">
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -406,6 +408,7 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
