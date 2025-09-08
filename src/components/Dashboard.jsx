@@ -196,6 +196,10 @@ const BillingSection = ({ userEmail, subscriptionData, onSubscriptionUpdate }) =
     setLoading(true);
     try {
       const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication required. Please log in again.');
+      }
+
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: {
@@ -214,11 +218,75 @@ const BillingSection = ({ userEmail, subscriptionData, onSubscriptionUpdate }) =
         const { url } = await response.json();
         window.location.href = url; // Redirect to Stripe Checkout
       } else {
-        alert('Failed to create checkout session. Please try again.');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Server error (${response.status}). Please try again.`;
+        
+        // Create error notification
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg z-50 max-w-md';
+        notification.innerHTML = `
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">Payment Error</h3>
+              <p class="mt-1 text-sm text-red-700">${errorMessage}</p>
+            </div>
+            <div class="ml-auto pl-3">
+              <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-600">
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 8 seconds
+        setTimeout(() => {
+          if (notification.parentElement) {
+            notification.remove();
+          }
+        }, 8000);
       }
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      alert('An error occurred. Please try again.');
+      
+      // Create error notification for network/other errors
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg z-50 max-w-md';
+      notification.innerHTML = `
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Connection Error</h3>
+            <p class="mt-1 text-sm text-red-700">${error.message || 'Unable to connect to payment service. Please check your internet connection and try again.'}</p>
+          </div>
+          <div class="ml-auto pl-3">
+            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-600">
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      // Auto-remove after 8 seconds
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, 8000);
     } finally {
       setLoading(false);
     }
@@ -414,36 +482,127 @@ const Dashboard = () => {
     checkAuth();
   }, [navigate]);
 
-  // Fetch subscription data after authentication
+  // Handle URL parameters for payment success/cancellation
   useEffect(() => {
-    const fetchSubscriptionData = async () => {
-      if (!isAuthenticated) return;
-      
-      try {
-        const userStr = localStorage.getItem('syncsure_user');
-        if (!userStr) return;
-        
-        const user = JSON.parse(userStr);
-        const userEmail = user.email;
-        
-        const token = localStorage.getItem('authToken');
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/stripe/subscription?email=${encodeURIComponent(userEmail)}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setSubscriptionData(data);
-        }
-      } catch (error) {
-        console.error('Error fetching subscription data:', error);
-      }
-    };
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const canceled = urlParams.get('canceled');
 
-    fetchSubscriptionData();
+    if (success === 'true') {
+      // Show success message and refresh subscription data
+      const successMessage = 'Payment successful! Your license will be available shortly. You will receive an email confirmation and your custom agent will be built automatically.';
+      
+      // Create a better success notification
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg z-50 max-w-md';
+      notification.innerHTML = `
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-green-800">Payment Successful!</h3>
+            <p class="mt-1 text-sm text-green-700">${successMessage}</p>
+          </div>
+          <div class="ml-auto pl-3">
+            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-green-400 hover:text-green-600">
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      // Auto-remove after 10 seconds
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, 10000);
+      
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Force refresh subscription data
+      fetchSubscriptionData();
+    } else if (canceled === 'true') {
+      // Show cancellation message with better UX
+      const cancelMessage = 'Payment was canceled. No charges were made to your account. You can try again anytime or contact support if you need assistance.';
+      
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4 shadow-lg z-50 max-w-md';
+      notification.innerHTML = `
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-yellow-800">Payment Canceled</h3>
+            <p class="mt-1 text-sm text-yellow-700">${cancelMessage}</p>
+          </div>
+          <div class="ml-auto pl-3">
+            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-yellow-400 hover:text-yellow-600">
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      // Auto-remove after 8 seconds
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, 8000);
+      
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
+  // Fetch subscription data
+  const fetchSubscriptionData = async () => {
+    try {
+      const token = localStorage.getItem('syncsure_token');
+      const userStr = localStorage.getItem('syncsure_user');
+      
+      if (!token || !userStr) return;
+      
+      const userData = JSON.parse(userStr);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/stripe/subscription?email=${encodeURIComponent(userData.email)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSubscriptionData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching subscription data:', error);
+    }
+  };
+
+  // Auto-refresh subscription data every 30 seconds
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchSubscriptionData(); // Initial fetch
+      
+      const interval = setInterval(() => {
+        fetchSubscriptionData();
+      }, 30000); // Refresh every 30 seconds
+
+      return () => clearInterval(interval);
+    }
   }, [isAuthenticated]);
 
   // Show loading state while checking authentication
@@ -473,11 +632,8 @@ const Dashboard = () => {
           companyName: user.companyName || 'SYNC-TEST-123',
           email: user.email || 'test@syncsure.com',
           firstName: user.firstName || 'Test',
-          lastName: user.lastName || 'User',
-          // License and device data - in real implementation, this comes from API
-          // ALL NEW CUSTOMERS START WITH 0 LICENSES AND 0 DEVICES
-          purchasedLicenses: user.purchasedLicenses || 0, // New customers start with 0 purchased licenses
-          activeDevices: user.activeDevices || 0 // New customers have 0 devices being monitored
+          lastName: user.lastName || 'User'
+          // Removed purchasedLicenses and activeDevices - these now come from subscriptionData API
         };
       }
     } catch (error) {
@@ -487,10 +643,8 @@ const Dashboard = () => {
       companyName: 'SYNC-TEST-123',
       email: 'test@syncsure.com',
       firstName: 'Test',
-      lastName: 'User',
-      // Default values for new customers - ALWAYS START WITH 0
-      purchasedLicenses: 0, // New customers start with 0 purchased licenses
-      activeDevices: 0 // New customers have 0 devices being monitored
+      lastName: 'User'
+      // Removed default license values - these now come from subscriptionData API
     };
   };
 
@@ -503,28 +657,7 @@ const Dashboard = () => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  // Get dynamic license and device data
-  const getLicenseData = () => {
-    // In a real implementation, this would fetch from API
-    // For now, we'll use placeholder logic that can be easily replaced
-    
-    // This should come from user's account data
-    const purchasedLicenses = userData.purchasedLicenses || 0; // Number of licenses purchased
-    
-    // This should come from device monitoring API
-    const activeDevices = userData.activeDevices || 0; // Number of devices being monitored
-    
-    return {
-      purchasedLicenses,
-      activeDevices,
-      // Calculate if customer has active licenses (purchased > 0)
-      hasActiveLicenses: purchasedLicenses > 0 ? purchasedLicenses : 0
-    };
-  };
-
-  const licenseData = getLicenseData();
-
-  // Dashboard stats - use real subscription data
+  // Dashboard stats - use real subscription data ONLY (removed getLicenseData dependency)
   const stats = {
     activeLicenses: subscriptionData?.licenseCount || 0, // Real license count from Stripe
     purchasedLicenses: subscriptionData?.licenseCount || 0, // Same as active licenses
