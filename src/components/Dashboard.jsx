@@ -29,6 +29,13 @@ const DownloadsSection = ({ userEmail }) => {
 
   useEffect(() => {
     fetchBuilds();
+    
+    // Auto-refresh builds every 30 seconds
+    const interval = setInterval(() => {
+      fetchBuilds();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [userEmail]);
 
   const fetchBuilds = async () => {
@@ -44,6 +51,12 @@ const DownloadsSection = ({ userEmail }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Manual refresh function
+  const handleRefresh = () => {
+    setLoading(true);
+    fetchBuilds();
   };
 
   const getStatusIcon = (status) => {
@@ -90,7 +103,23 @@ const DownloadsSection = ({ userEmail }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Your Downloads</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-medium text-gray-900">Your Downloads</h3>
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center text-xs text-gray-500">
+            <div className="h-2 w-2 bg-green-400 rounded-full mr-1 animate-pulse"></div>
+            Auto-refresh: 30s
+          </div>
+          <button
+            onClick={handleRefresh}
+            disabled={loading}
+            className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+            title="Refresh downloads"
+          >
+            <Activity className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+      </div>
       
       {builds.length === 0 ? (
         <div className="text-center py-8">
@@ -184,6 +213,142 @@ Write-Host "SyncSure Agent installed successfully with license: ${build.license_
           ))}
         </div>
       )}
+    </div>
+  );
+};
+
+// Devices Section Component
+const DevicesSection = ({ userEmail, companyName }) => {
+  const [devices, setDevices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDevices();
+    
+    // Auto-refresh devices every 30 seconds
+    const interval = setInterval(() => {
+      fetchDevices();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [userEmail]);
+
+  const fetchDevices = async () => {
+    try {
+      // This endpoint would need to be implemented in the backend
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/devices/customer/${encodeURIComponent(userEmail)}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setDevices(data.devices || []);
+      }
+    } catch (error) {
+      console.error('Error fetching devices:', error);
+      // For now, set empty array if endpoint doesn't exist
+      setDevices([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    setLoading(true);
+    fetchDevices();
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium text-gray-900">Devices for {companyName}</h3>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center text-xs text-gray-500">
+              <div className="h-2 w-2 bg-green-400 rounded-full mr-1 animate-pulse"></div>
+              Auto-refresh: 30s
+            </div>
+            <button
+              onClick={handleRefresh}
+              disabled={loading}
+              className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+              title="Refresh devices"
+            >
+              <Activity className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="p-6">
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-gray-600">Loading devices...</span>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Device
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Last Seen
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Event
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Message
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {devices.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-8 text-center">
+                      <div className="text-center">
+                        <Monitor className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">No devices found</h4>
+                        <p className="text-gray-500 mb-4">Install the SyncSure agent to start monitoring</p>
+                        <p className="text-sm text-gray-400">Device events will appear here</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  devices.map((device, index) => (
+                    <tr key={device.id || index}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {device.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {device.lastSeen}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          device.status === 'healthy' ? 'bg-green-100 text-green-800' :
+                          device.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {device.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {device.event}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {device.message}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -778,7 +943,11 @@ const Dashboard = () => {
               <h1 className="text-2xl font-semibold text-gray-900">Dashboard Overview</h1>
               <p className="text-gray-600">Monitor your OneDrive health across all devices</p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center text-xs text-gray-500">
+                <div className="h-2 w-2 bg-blue-400 rounded-full mr-1 animate-pulse"></div>
+                Auto-refresh: 30s
+              </div>
               <div className="flex items-center text-sm text-gray-500">
                 <div className="h-2 w-2 bg-green-400 rounded-full mr-2"></div>
                 System Healthy
@@ -880,70 +1049,8 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Devices Table */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">Devices for {userData.companyName}</h3>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Device</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Last Seen</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Status</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Event</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-500">Message</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td colSpan="5" className="text-center py-8 text-gray-500">
-                          No devices yet
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            {/* Active Devices Section */}
-            <div className="bg-white rounded-lg shadow-sm border mt-6">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">Active Devices</h3>
-                  <div className="flex items-center space-x-4">
-                    <div className="relative">
-                      <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search devices..."
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm bg-white"
-                      />
-                    </div>
-                    <Button
-                      onClick={handleAddDevice}
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Device
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="text-center py-12">
-                  <Monitor className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">No devices found</h4>
-                  <p className="text-gray-500 mb-4">Install the SyncSure agent to start monitoring</p>
-                  <p className="text-sm text-gray-400">Device events will appear here</p>
-                </div>
-              </div>
-            </div>
+            {/* Devices Section */}
+            <DevicesSection userEmail={userData.email} companyName={userData.companyName} />
           </div>
         )}
 
