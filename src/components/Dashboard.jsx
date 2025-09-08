@@ -200,7 +200,7 @@ const BillingSection = ({ userEmail }) => {
   const fetchSubscriptionData = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/stripe/subscription`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/stripe/subscription?email=${encodeURIComponent(userEmail)}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
