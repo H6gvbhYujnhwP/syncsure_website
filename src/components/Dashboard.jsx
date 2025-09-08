@@ -189,32 +189,8 @@ Write-Host "SyncSure Agent installed successfully with license: ${build.license_
 };
 
 // Billing Section Component
-const BillingSection = ({ userEmail }) => {
+const BillingSection = ({ userEmail, subscriptionData, onSubscriptionUpdate }) => {
   const [loading, setLoading] = useState(false);
-  const [subscriptionData, setSubscriptionData] = useState(null);
-
-  useEffect(() => {
-    fetchSubscriptionData();
-  }, []);
-
-  const fetchSubscriptionData = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/stripe/subscription?email=${encodeURIComponent(userEmail)}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setSubscriptionData(data);
-      }
-    } catch (error) {
-      console.error('Error fetching subscription data:', error);
-    }
-  };
 
   const handlePurchaseLicense = async () => {
     setLoading(true);
@@ -228,7 +204,7 @@ const BillingSection = ({ userEmail }) => {
         },
         body: JSON.stringify({
           email: userEmail,
-          priceId: 'price_1QFqKdP5zKbGZWhOjmhJdqzl', // Your Stripe price ID
+          priceId: 'price_1S3aWcFqWt5tjv3COq6g1ffY', // Your real Stripe price ID
           successUrl: `${window.location.origin}/dashboard?success=true`,
           cancelUrl: `${window.location.origin}/dashboard?canceled=true`
         })
@@ -260,7 +236,11 @@ const BillingSection = ({ userEmail }) => {
               <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
               <div>
                 <p className="font-medium text-green-900">Active Subscription</p>
-                <p className="text-sm text-green-700">SyncSure Monitor - £1.99/month</p>
+                <p className="text-sm text-green-700">
+                  SyncSure Monitor - {subscriptionData.licenseCount <= 50 ? '£1.99' : 
+                                     subscriptionData.licenseCount <= 500 ? '£1.49' : '£0.99'}/month
+                  ({subscriptionData.licenseCount} {subscriptionData.licenseCount === 1 ? 'license' : 'licenses'})
+                </p>
               </div>
             </div>
             <div className="text-right">
@@ -292,8 +272,12 @@ const BillingSection = ({ userEmail }) => {
               <p className="text-sm text-blue-700">Professional OneDrive monitoring for MSPs</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-blue-900">£1.99</p>
-              <p className="text-sm text-blue-700">per month</p>
+              <p className="text-lg font-bold text-blue-900">Volume Pricing</p>
+              <div className="text-sm text-blue-700 space-y-1">
+                <p>1-50 devices: <span className="font-semibold">£1.99</span>/month</p>
+                <p>51-500 devices: <span className="font-semibold">£1.49</span>/month</p>
+                <p>501+ devices: <span className="font-semibold">£0.99</span>/month</p>
+              </div>
             </div>
           </div>
           
@@ -403,6 +387,7 @@ const Dashboard = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [subscriptionData, setSubscriptionData] = useState(null);
 
   // Check authentication on component mount
   useEffect(() => {
@@ -428,6 +413,38 @@ const Dashboard = () => {
 
     checkAuth();
   }, [navigate]);
+
+  // Fetch subscription data after authentication
+  useEffect(() => {
+    const fetchSubscriptionData = async () => {
+      if (!isAuthenticated) return;
+      
+      try {
+        const userStr = localStorage.getItem('syncsure_user');
+        if (!userStr) return;
+        
+        const user = JSON.parse(userStr);
+        const userEmail = user.email;
+        
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/stripe/subscription?email=${encodeURIComponent(userEmail)}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setSubscriptionData(data);
+        }
+      } catch (error) {
+        console.error('Error fetching subscription data:', error);
+      }
+    };
+
+    fetchSubscriptionData();
+  }, [isAuthenticated]);
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -507,12 +524,12 @@ const Dashboard = () => {
 
   const licenseData = getLicenseData();
 
-  // Dashboard stats - dynamic calculation
+  // Dashboard stats - use real subscription data
   const stats = {
-    activeLicenses: licenseData.hasActiveLicenses, // Shows purchased licenses or 0 for new customers
-    purchasedLicenses: licenseData.purchasedLicenses, // Total licenses purchased
-    activeDevices: licenseData.activeDevices, // Devices currently being monitored
-    healthyDevices: licenseData.activeDevices // For now, assume all active devices are healthy
+    activeLicenses: subscriptionData?.licenseCount || 0, // Real license count from Stripe
+    purchasedLicenses: subscriptionData?.licenseCount || 0, // Same as active licenses
+    activeDevices: subscriptionData?.deviceCount || 0, // Real device count from database
+    healthyDevices: subscriptionData?.deviceCount || 0 // For now, assume all active devices are healthy
   };
 
   const sidebarItems = [
@@ -781,7 +798,11 @@ const Dashboard = () => {
         {/* Billing & Seats Section */}
         {activeSection === 'billing' && (
           <div className="p-6">
-            <BillingSection userEmail={userData.email} />
+            <BillingSection 
+              userEmail={userData.email} 
+              subscriptionData={subscriptionData}
+              onSubscriptionUpdate={setSubscriptionData}
+            />
           </div>
         )}
 
