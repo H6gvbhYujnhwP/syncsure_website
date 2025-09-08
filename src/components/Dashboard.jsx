@@ -673,10 +673,34 @@ const Dashboard = () => {
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
-  const handleLogout = () => {
-    // Clear authentication data
+  // Utility function to clear all SyncSure-related cache
+  const clearAuthCache = () => {
+    // Clear localStorage
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('syncsure_'))
+      .forEach(k => localStorage.removeItem(k));
+    
+    // Clear sessionStorage  
+    Object.keys(sessionStorage)
+      .filter(k => k.startsWith('syncsure_'))
+      .forEach(k => sessionStorage.removeItem(k));
+    
+    // Clear specific auth items (legacy naming)
+    localStorage.removeItem('authToken');
     localStorage.removeItem('syncsure_token');
     localStorage.removeItem('syncsure_user');
+    
+    // Clear any subscription/license cache
+    localStorage.removeItem('subscription');
+    localStorage.removeItem('licenseData');
+    localStorage.removeItem('licenseCount');
+    sessionStorage.removeItem('subscription');
+    sessionStorage.removeItem('licenseData');
+  };
+
+  const handleLogout = () => {
+    // Clear ALL authentication and cached data
+    clearAuthCache();
     
     // Navigate to login page
     navigate('/login');

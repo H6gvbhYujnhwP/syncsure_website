@@ -15,6 +15,31 @@ const Login = () => {
     confirmPassword: ''
   });
 
+  // Utility function to clear all SyncSure-related cache
+  const clearAuthCache = () => {
+    // Clear localStorage
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('syncsure_'))
+      .forEach(k => localStorage.removeItem(k));
+    
+    // Clear sessionStorage  
+    Object.keys(sessionStorage)
+      .filter(k => k.startsWith('syncsure_'))
+      .forEach(k => sessionStorage.removeItem(k));
+    
+    // Clear specific auth items (legacy naming)
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('syncsure_token');
+    localStorage.removeItem('syncsure_user');
+    
+    // Clear any subscription/license cache
+    localStorage.removeItem('subscription');
+    localStorage.removeItem('licenseData');
+    localStorage.removeItem('licenseCount');
+    sessionStorage.removeItem('subscription');
+    sessionStorage.removeItem('licenseData');
+  };
+
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -58,6 +83,9 @@ const Login = () => {
         console.log('Login response:', data);
 
         if (data.ok) {
+          // Clear any stale cache before storing new auth data
+          clearAuthCache();
+          
           // Store authentication token
           localStorage.setItem('syncsure_token', data.token);
           localStorage.setItem('syncsure_user', JSON.stringify(data.account));
@@ -112,6 +140,9 @@ const Login = () => {
       console.log('Account creation response:', data);
 
       if (data.ok) {
+        // Clear any stale cache before storing new auth data
+        clearAuthCache();
+        
         // Store authentication token
         localStorage.setItem('syncsure_token', data.token);
         localStorage.setItem('syncsure_user', JSON.stringify(data.account));
