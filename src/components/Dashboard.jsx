@@ -195,15 +195,10 @@ const BillingSection = ({ userEmail, subscriptionData, onSubscriptionUpdate }) =
   const handlePurchaseLicense = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('Authentication required. Please log in again.');
-      }
-
+      // No authentication required for checkout - Stripe handles customer verification
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
