@@ -101,11 +101,20 @@ const Privacy = () => {
           </ul>
 
           <h3>Important Note About File Content</h3>
-          <p className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+          <p className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-4">
             <strong>SyncSure does not access, read, or store the content of your OneDrive files.</strong> 
             We only monitor sync status, metadata, and health metrics. Your actual documents, 
             photos, and files remain private and are never accessed by our service.
           </p>
+
+          <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+            <p className="font-semibold mb-2">Microsoft Independence Notice:</p>
+            <p>
+              <strong>SyncSure is an independent third-party service provider and is not affiliated 
+              with Microsoft Corporation.</strong> We provide monitoring services only and do not modify 
+              or interfere with OneDrive functionality. Microsoft OneDrive is a trademark of Microsoft Corporation.
+            </p>
+          </div>
 
           <h2>Data Sharing and Disclosure</h2>
           

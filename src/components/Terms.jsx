@@ -17,7 +17,7 @@ const Terms = () => {
             Terms of Service
           </h1>
           <p className="text-lg text-gray-600">
-            Last updated: September 5, 2025
+            Last updated: September 9, 2025
           </p>
         </div>
       </div>
@@ -39,6 +39,60 @@ const Terms = () => {
             (MSPs) and businesses. Our Service monitors OneDrive sync health, detects issues, and 
             provides alerts and reporting capabilities.
           </p>
+
+          <h2>Important Disclaimers and Legal Protections</h2>
+          
+          <div className="bg-red-50 p-6 rounded-lg border-l-4 border-red-500 mb-6">
+            <h3 className="text-red-800 font-bold mb-4">CRITICAL LEGAL DISCLAIMERS</h3>
+            
+            <h4 className="font-semibold text-red-700 mb-2">Independence from Microsoft</h4>
+            <p className="mb-4">
+              <strong>SyncSure is a completely separate and independent entity from Microsoft Corporation.</strong> 
+              We are not affiliated with, endorsed by, sponsored by, or in any way connected to Microsoft. 
+              SyncSure is an independent third-party monitoring solution that observes OneDrive functionality 
+              from the outside.
+            </p>
+
+            <h4 className="font-semibold text-red-700 mb-2">Read-Only Monitoring Service</h4>
+            <p className="mb-4">
+              <strong>SyncSure is purely a monitoring and observation tool.</strong> Our software:
+            </p>
+            <ul className="mb-4 ml-4">
+              <li>• Does NOT modify, alter, or change any OneDrive functionality</li>
+              <li>• Does NOT interfere with OneDrive operations or processes</li>
+              <li>• Does NOT access, read, modify, or store the content of your files</li>
+              <li>• Does NOT make any changes to your OneDrive settings or configuration</li>
+              <li>• Only observes and reports on sync status and health metrics</li>
+            </ul>
+
+            <h4 className="font-semibold text-red-700 mb-2">No Liability for OneDrive Issues</h4>
+            <p className="mb-4">
+              <strong>SyncSure is NOT responsible or liable for any OneDrive malfunctions, failures, or issues.</strong> 
+              We provide monitoring services only. If OneDrive experiences problems, data loss, sync failures, 
+              or any other issues, SyncSure bears no responsibility or liability. OneDrive functionality is 
+              entirely controlled by Microsoft, and any issues should be addressed with Microsoft support.
+            </p>
+
+            <h4 className="font-semibold text-red-700 mb-2">Legal Compliance</h4>
+            <p className="mb-4">
+              <strong>SyncSure operates in full compliance with all applicable laws and Microsoft's terms of service.</strong> 
+              Our monitoring solution:
+            </p>
+            <ul className="mb-4 ml-4">
+              <li>• Does not violate any Microsoft copyright, trademark, or intellectual property rights</li>
+              <li>• Uses only publicly available APIs and standard monitoring techniques</li>
+              <li>• Complies with Microsoft's acceptable use policies</li>
+              <li>• Provides a legitimate business service that helps organizations monitor their IT infrastructure</li>
+            </ul>
+
+            <h4 className="font-semibold text-red-700 mb-2">Service Purpose</h4>
+            <p>
+              <strong>SyncSure exists to help solve a common IT management problem.</strong> We provide visibility 
+              into OneDrive sync health to help IT administrators proactively identify and address issues. 
+              This is a legitimate business need and our solution provides value by enabling better IT management 
+              and user support.
+            </p>
+          </div>
 
           <h2>Account Registration and Security</h2>
           
@@ -149,13 +203,21 @@ const Terms = () => {
 
           <h2>Limitation of Liability</h2>
           
-          <div className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-500">
+          <div className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-500 mb-6">
             <p className="font-semibold mb-2">Important Legal Notice:</p>
-            <p>
+            <p className="mb-4">
               TO THE MAXIMUM EXTENT PERMITTED BY LAW, SYNCSURE SHALL NOT BE LIABLE FOR ANY 
               INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING 
               BUT NOT LIMITED TO LOSS OF PROFITS, DATA, OR USE, EVEN IF WE HAVE BEEN ADVISED 
               OF THE POSSIBILITY OF SUCH DAMAGES.
+            </p>
+            
+            <p className="font-semibold mb-2">OneDrive-Specific Disclaimers:</p>
+            <p>
+              SYNCSURE IS NOT LIABLE FOR ANY ONEDRIVE MALFUNCTIONS, SYNC FAILURES, DATA LOSS, 
+              FILE CORRUPTION, OR ANY OTHER ONEDRIVE-RELATED ISSUES. WE ARE A MONITORING SERVICE ONLY 
+              AND DO NOT CONTROL, MODIFY, OR INTERFERE WITH ONEDRIVE FUNCTIONALITY. ALL ONEDRIVE 
+              ISSUES MUST BE ADDRESSED WITH MICROSOFT SUPPORT.
             </p>
           </div>
 
@@ -163,6 +225,15 @@ const Terms = () => {
             Our total liability for any claims arising from or related to the Service shall not 
             exceed the amount you paid for the Service in the 12 months preceding the claim.
           </p>
+
+          <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500 mt-6">
+            <p className="font-semibold mb-2">Microsoft Independence Notice:</p>
+            <p>
+              SyncSure is an independent third-party service provider. We are not affiliated with 
+              Microsoft Corporation. Microsoft OneDrive is a trademark of Microsoft Corporation. 
+              Any issues with OneDrive functionality should be directed to Microsoft support, not SyncSure.
+            </p>
+          </div>
 
           <h2>Indemnification</h2>
           <p>
