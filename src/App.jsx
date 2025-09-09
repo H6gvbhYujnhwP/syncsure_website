@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 import LoginFixed from './components/LoginFixed';
 import Dashboard from './components/Dashboard';
 import DashboardLoginAuth from './components/DashboardLoginAuth';
+import Instructions from './components/Instructions';
 import Help from './components/Help';
 import About from './components/About';
 import Privacy from './components/Privacy';
@@ -34,6 +35,9 @@ function App() {
           
           {/* Dashboard Page */}
           <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* Instructions Page */}
+          <Route path="/instructions" element={<Instructions />} />
           
           {/* Dashboard Login Auth Test Page */}
           <Route path="/dashboard-login-auth" element={<DashboardLoginAuth />} />

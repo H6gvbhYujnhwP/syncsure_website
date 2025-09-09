@@ -17,7 +17,8 @@ import {
   Settings,
   CreditCard,
   LogOut,
-  Monitor
+  Monitor,
+  BookOpen
 } from 'lucide-react';
 import { Button } from './ui/button';
 import syncSureLogo from '../assets/Syncsure_Logo_1.png';
@@ -147,44 +148,50 @@ const DownloadsSection = ({ userEmail }) => {
                   </div>
                 </div>
                 
-                {build.status === 'released' && build.release_url && (
-                  <div className="flex space-x-2">
-                    <a
-                      href={build.release_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download .exe
-                    </a>
-                    <button
-                      onClick={() => {
-                        // Generate PowerShell script for bulk deployment
-                        const psScript = `# SyncSure Agent Bulk Deployment Script
-# License: ${build.license_key}
-# Download URL: ${build.release_url}
-
-# Download and install SyncSure Agent
-$url = "${build.release_url}"
-$output = "$env:TEMP\\SyncSureAgent.exe"
-Invoke-WebRequest -Uri $url -OutFile $output
-Start-Process -FilePath $output -ArgumentList "/S" -Wait
-Write-Host "SyncSure Agent installed successfully with license: ${build.license_key}"`;
-                        
-                        const blob = new Blob([psScript], { type: 'text/plain' });
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `syncsure-deploy-${build.tag}.ps1`;
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                      }}
-                      className="inline-flex items-center px-3 py-2 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      PowerShell Script
-                    </button>
+                {build.status === 'released' && (
+                  <div className="flex flex-col space-y-2">
+                    {/* Main executable download */}
+                    <div className="flex items-center space-x-2">
+                      <a
+                        href={`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/builds/download/${build.id}/exe`}
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        SyncSureAgent.exe
+                      </a>
+                      <span className="text-xs text-gray-500">Main executable</span>
+                    </div>
+                    
+                    {/* Hash file download */}
+                    <div className="flex items-center space-x-2">
+                      <a
+                        href={`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/builds/download/${build.id}/hash`}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Hash File (.sha256)
+                      </a>
+                      <span className="text-xs text-gray-500">Security verification</span>
+                    </div>
+                    
+                    {/* PowerShell script download with instructions */}
+                    <div className="flex items-center space-x-2">
+                      <a
+                        href={`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/builds/download/${build.id}/script`}
+                        className="inline-flex items-center px-4 py-2 border border-green-300 text-green-700 text-sm font-medium rounded-md hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        PowerShell Script
+                      </a>
+                      <button
+                        onClick={() => window.location.href = '/instructions'}
+                        className="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                      >
+                        <BookOpen className="h-4 w-4 mr-1" />
+                        Instructions
+                      </button>
+                      <span className="text-xs text-gray-500">Automated deployment</span>
+                    </div>
                   </div>
                 )}
               </div>
