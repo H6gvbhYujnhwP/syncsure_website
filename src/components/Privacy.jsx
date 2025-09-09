@@ -17,7 +17,7 @@ const Privacy = () => {
             Privacy Policy
           </h1>
           <p className="text-lg text-gray-600">
-            Last updated: September 5, 2025
+            Last updated: September 9, 2025
           </p>
         </div>
       </div>
@@ -38,10 +38,19 @@ const Privacy = () => {
           <h3>Account Information</h3>
           <p>When you create an account, we collect:</p>
           <ul>
-            <li>Name and email address</li>
-            <li>Company information</li>
-            <li>Billing and payment information</li>
+            <li>Email address for account creation and authentication</li>
+            <li>Name for account identification</li>
+            <li>Stripe customer ID for billing and subscription management</li>
+            <li>Payment information (processed securely by Stripe, not stored on our servers)</li>
             <li>Contact preferences</li>
+          </ul>
+
+          <h3>License and Usage Data</h3>
+          <p>Our service collects:</p>
+          <ul>
+            <li>License usage data for monitoring device limits</li>
+            <li>Device registration information for license enforcement</li>
+            <li>Software installation and activation data</li>
           </ul>
 
           <h3>OneDrive Monitoring Data</h3>
@@ -66,12 +75,16 @@ const Privacy = () => {
           
           <p>We use the collected information to:</p>
           <ul>
+            <li>Provide user authentication and account management</li>
+            <li>Process payments and manage subscriptions through Stripe</li>
+            <li>Generate and manage software licenses for the SyncSure monitoring agent</li>
+            <li>Monitor license usage to enforce device limits per subscription</li>
+            <li>Provide customer support and service communications</li>
+            <li>Ensure compliance with subscription terms and prevent unauthorized usage</li>
             <li>Provide and maintain our monitoring services</li>
             <li>Send alerts and notifications about OneDrive issues</li>
             <li>Generate reports and analytics</li>
             <li>Improve our service quality and features</li>
-            <li>Process payments and manage subscriptions</li>
-            <li>Provide customer support</li>
             <li>Comply with legal obligations</li>
           </ul>
 
