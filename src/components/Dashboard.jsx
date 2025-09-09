@@ -111,6 +111,9 @@ const DownloadsSection = ({ userEmail }) => {
             <div className="h-2 w-2 bg-green-400 rounded-full mr-1 animate-pulse"></div>
             Auto-refresh: 30s
           </div>
+          <div className="text-xs text-gray-400">
+            Last updated: {new Date().toLocaleTimeString()}
+          </div>
           <button
             onClick={handleRefresh}
             disabled={loading}
@@ -142,9 +145,27 @@ const DownloadsSection = ({ userEmail }) => {
                     <p className="text-sm text-gray-500">
                       License: {build.license_key} • Max Devices: {build.max_devices}
                     </p>
-                    <p className="text-sm text-gray-500">
-                      Status: {getStatusText(build.status)}
-                    </p>
+                    <div className="flex items-center space-x-4">
+                      <p className="text-sm text-gray-500">
+                        Status: {getStatusText(build.status)}
+                      </p>
+                      {build.id && (
+                        <div className="flex items-center space-x-1">
+                          <span className="text-xs text-gray-400">Build:</span>
+                          <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                            #{build.id.slice(-8)}
+                          </span>
+                        </div>
+                      )}
+                      {build.created_at && (
+                        <div className="flex items-center space-x-1">
+                          <Clock className="h-3 w-3 text-gray-400" />
+                          <span className="text-xs text-gray-400">
+                            {new Date(build.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
@@ -159,7 +180,17 @@ const DownloadsSection = ({ userEmail }) => {
                         <Download className="h-4 w-4 mr-2" />
                         SyncSureAgent.exe
                       </a>
-                      <span className="text-xs text-gray-500">Main executable</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs text-gray-500">Main executable</span>
+                        <span className="text-xs font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          Build #{build.id.slice(-8)}
+                        </span>
+                        {build.updated_at && (
+                          <span className="text-xs text-gray-400">
+                            {new Date(build.updated_at).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     
                     {/* Hash file download */}
