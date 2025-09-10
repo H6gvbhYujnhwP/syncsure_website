@@ -143,7 +143,7 @@ const DownloadsSection = ({ userEmail }) => {
                       SyncSure Agent {build.tag}
                     </h4>
                     <p className="text-sm text-gray-500">
-                      License: {build.license_key} • Max Devices: {build.max_devices}
+                      License: {build.license_key} • Pricing Tier: {build.pricing_tier} • Pricing Tier: {build.pricing_tier}
                     </p>
                     <div className="flex items-center space-x-4">
                       <p className="text-sm text-gray-500">
