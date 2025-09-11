@@ -41,14 +41,19 @@ const DownloadsSection = ({ userEmail }) => {
 
   const fetchBuilds = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/builds/customer/${encodeURIComponent(userEmail)}`);
+      // Use V9 builds endpoint
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/v9/builds/customer/${encodeURIComponent(userEmail)}`);
       const data = await response.json();
       
       if (data.success) {
-        setBuilds(data.builds);
+        setBuilds(data.builds || []);
+      } else {
+        console.log('V9 builds endpoint response:', data);
+        setBuilds([]);
       }
     } catch (error) {
-      console.error('Error fetching builds:', error);
+      console.error('Error fetching V9 builds:', error);
+      setBuilds([]);
     } finally {
       setLoading(false);
     }
@@ -273,15 +278,18 @@ const DevicesSection = ({ userEmail, companyName }) => {
 
   const fetchDevices = async () => {
     try {
-      // This endpoint would need to be implemented in the backend
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/devices/customer/${encodeURIComponent(userEmail)}`);
+      // Use V9 devices endpoint
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/v9/devices/customer/${encodeURIComponent(userEmail)}`);
       const data = await response.json();
       
       if (data.success) {
         setDevices(data.devices || []);
+      } else {
+        console.log('V9 devices endpoint response:', data);
+        setDevices([]);
       }
     } catch (error) {
-      console.error('Error fetching devices:', error);
+      console.error('Error fetching V9 devices:', error);
       // For now, set empty array if endpoint doesn't exist
       setDevices([]);
     } finally {
@@ -766,7 +774,7 @@ const Dashboard = () => {
     }
   }, []);
 
-  // Fetch subscription data
+  // Fetch subscription data using V9 endpoint
   const fetchSubscriptionData = async () => {
     try {
       const token = localStorage.getItem('syncsure_token');
@@ -775,18 +783,37 @@ const Dashboard = () => {
       if (!token || !userStr) return;
       
       const userData = JSON.parse(userStr);
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/stripe/subscription?email=${encodeURIComponent(userData.email)}`, {
+      
+      // Use V9 dashboard summary endpoint
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/v9/dashboard/summary?email=${encodeURIComponent(userData.email)}`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
       if (response.ok) {
         const data = await response.json();
-        setSubscriptionData(data);
+        console.log('V9 Dashboard data:', data);
+        
+        // Transform V9 data to match expected format
+        const transformedData = {
+          licenseCount: data.license?.device_count || 0,
+          deviceCount: data.license?.bound_count || 0,
+          pricingTier: data.license?.pricing_tier || 'starter',
+          pricePerDevice: data.license?.price_per_device || 1.99,
+          nextBilling: data.subscription?.current_period_end ? 
+            new Date(data.subscription.current_period_end).toLocaleDateString() : 'N/A',
+          status: data.subscription?.status || 'inactive',
+          invoices: [] // Will be populated later
+        };
+        
+        setSubscriptionData(transformedData);
+      } else {
+        console.error('Failed to fetch V9 dashboard data:', response.status);
       }
     } catch (error) {
-      console.error('Error fetching subscription data:', error);
+      console.error('Error fetching V9 dashboard data:', error);
     }
   };
 
