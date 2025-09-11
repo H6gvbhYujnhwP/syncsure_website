@@ -375,7 +375,7 @@ const DownloadsSection = ({ userEmail }) => {
         </div>
       )}
     </div>
-   );
+  );
 };
 
 // Devices Section Component
