@@ -21,33 +21,161 @@ import {
   BookOpen
 } from 'lucide-react';
 import { Button } from './ui/button';
+import LicenseManagement from './LicenseManagement';
 import syncSureLogo from '../assets/Syncsure_Logo_1.png';
 
-// Downloads Section Component
+// V9 Downloads Section Component - Fetches from Stripe
 const DownloadsSection = ({ userEmail }) => {
-  const [builds, setBuilds] = useState([]);
+  const [downloadData, setDownloadData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchBuilds();
+    fetchDownloadData();
     
-    // Auto-refresh builds every 30 seconds
+    // Auto-refresh every 30 seconds
     const interval = setInterval(() => {
-      fetchBuilds();
+      fetchDownloadData();
     }, 30000);
 
     return () => clearInterval(interval);
   }, [userEmail]);
 
-  const fetchBuilds = async () => {
+  const fetchDownloadData = async () => {
     try {
-      // Use V9 builds endpoint
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/v9/builds/customer/${encodeURIComponent(userEmail)}`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://syncsure-backend.onrender.com'}/api/v9/dashboard/downloads?email=${encodeURIComponent(userEmail)}`);
       const data = await response.json();
+      setDownloadData(data);
+    } catch (error) {
+      console.error('Error fetching download data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center">
+          <Download className="mr-2 h-5 w-5" />
+          Your Downloads
+        </h2>
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2">Loading downloads...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!downloadData?.hasSubscription) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center">
+          <Download className="mr-2 h-5 w-5" />
+          Your Downloads
+        </h2>
+        <div className="text-center py-8">
+          <Download className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <p className="text-gray-600 mb-4">
+            Purchase a license to receive your SyncSure monitor tool
+          </p>
+          <Button 
+            onClick={() => document.getElementById('license-management-tab')?.click()}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Go to License Management
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <h2 className="text-xl font-semibold mb-4 flex items-center">
+        <Download className="mr-2 h-5 w-5" />
+        Your Downloads
+        <span className="ml-auto text-sm text-gray-500">Auto-refresh: 30s</span>
+      </h2>
       
-      if (data.success) {
-        setBuilds(data.builds || []);
-      } else {
+      <div className="space-y-4">
+        {downloadData.buildStatus === 'building' && (
+          <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+              <div>
+                <h3 className="font-medium text-blue-900">Building Your Custom Tool</h3>
+                <p className="text-sm text-blue-700">{downloadData.message}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {downloadData.buildStatus === 'completed' && downloadData.downloadUrl && (
+          <div className="border border-green-200 bg-green-50 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                <div>
+                  <h3 className="font-medium text-green-900">SyncSure Agent</h3>
+                  <p className="text-sm text-green-700">
+                    License: {downloadData.licenseKey}
+                  </p>
+                  <p className="text-sm text-green-700">Ready for Download</p>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <Button 
+                  size="sm" 
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => window.open(downloadData.downloadUrl, '_blank')}
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  SyncSureAgent.exe
+                </Button>
+                {downloadData.buildInfo?.asset_api_url && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => window.open(downloadData.buildInfo.asset_api_url.replace('.exe', '.exe.sha256'), '_blank')}
+                  >
+                    Hash File (.sha256)
+                  </Button>
+                )}
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.open('/deploy-syncsure-agent.ps1', '_blank')}
+                >
+                  PowerShell Script
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.open('/instructions', '_blank')}
+                >
+                  Instructions
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {downloadData.buildStatus === 'failed' && (
+          <div className="border border-red-200 bg-red-50 rounded-lg p-4">
+            <div className="flex items-center">
+              <AlertCircle className="h-5 w-5 text-red-600 mr-3" />
+              <div>
+                <h3 className="font-medium text-red-900">Build Failed</h3>
+                <p className="text-sm text-red-700">Please contact support for assistance.</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
         console.log('V9 builds endpoint response:', data);
         setBuilds([]);
       }
@@ -179,7 +307,7 @@ const DownloadsSection = ({ userEmail }) => {
                     {/* Main executable download */}
                     <div className="flex items-center space-x-2">
                       <a
-                        href={`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/builds/download/${build.id}/exe`}
+                        href={`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/builds/download/${build.id}/exe`}
                         className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
                         <Download className="h-4 w-4 mr-2" />
@@ -201,7 +329,7 @@ const DownloadsSection = ({ userEmail }) => {
                     {/* Hash file download */}
                     <div className="flex items-center space-x-2">
                       <a
-                        href={`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/builds/download/${build.id}/hash`}
+                        href={`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/builds/download/${build.id}/hash`}
                         className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
                         <Shield className="h-4 w-4 mr-2" />
@@ -213,7 +341,7 @@ const DownloadsSection = ({ userEmail }) => {
                     {/* PowerShell script download with instructions */}
                     <div className="flex items-center space-x-2">
                       <a
-                        href={`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/builds/download/${build.id}/script`}
+                        href={`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/builds/download/${build.id}/script`}
                         className="inline-flex items-center px-4 py-2 border border-green-300 text-green-700 text-sm font-medium rounded-md hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                       >
                         <FileText className="h-4 w-4 mr-2" />
@@ -278,16 +406,10 @@ const DevicesSection = ({ userEmail, companyName }) => {
 
   const fetchDevices = async () => {
     try {
-      // Use V9 devices endpoint
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://syncsure-backend.onrender.com'}/api/v9/devices/customer/${encodeURIComponent(userEmail)}`);
-      const data = await response.json();
-      
-      if (data.success) {
-        setDevices(data.devices || []);
-      } else {
-        console.log('V9 devices endpoint response:', data);
-        setDevices([]);
-      }
+      // Device data is now included in the V9 dashboard summary
+      // No separate devices endpoint needed
+      console.log('Device data should come from dashboard summary');
+      setDevices([]);
     } catch (error) {
       console.error('Error fetching V9 devices:', error);
       // For now, set empty array if endpoint doesn't exist
@@ -784,8 +906,8 @@ const Dashboard = () => {
       
       const userData = JSON.parse(userStr);
       
-      // Use V9 dashboard summary endpoint
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://syncsure-backend.onrender.com'}/api/v9/dashboard/summary?email=${encodeURIComponent(userData.email)}`, {
+      // Use V9 dashboard summary endpoint that fetches from Stripe
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://syncsure-backend.onrender.com'}/api/v9/dashboard/summary?email=${encodeURIComponent(userData.email)}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -798,22 +920,42 @@ const Dashboard = () => {
         
         // Transform V9 data to match expected format
         const transformedData = {
-          licenseCount: data.license?.device_count || 0,
-          deviceCount: data.license?.bound_count || 0,
-          pricingTier: data.license?.pricing_tier || 'starter',
-          pricePerDevice: data.license?.price_per_device || 1.99,
-          nextBilling: data.subscription?.current_period_end ? 
-            new Date(data.subscription.current_period_end).toLocaleDateString() : 'N/A',
-          status: data.subscription?.status || 'inactive',
-          invoices: [] // Will be populated later
+          active: data.hasSubscription || false,
+          licenseCount: data.stripeData?.quantity || 0,
+          deviceCount: data.deviceCount || 0,
+          pricingTier: data.pricingTier || 'starter',
+          pricePerDevice: data.pricePerDevice || 1.99,
+          nextBilling: data.stripeData?.current_period_end ? 
+            new Date(data.stripeData.current_period_end * 1000).toLocaleDateString() : 'N/A',
+          status: data.stripeData?.status || 'inactive'
         };
         
         setSubscriptionData(transformedData);
       } else {
         console.error('Failed to fetch V9 dashboard data:', response.status);
+        // Set default data for no subscription
+        setSubscriptionData({
+          active: false,
+          licenseCount: 0,
+          deviceCount: 0,
+          pricingTier: 'starter',
+          pricePerDevice: 1.99,
+          nextBilling: 'N/A',
+          status: 'inactive'
+        });
       }
     } catch (error) {
       console.error('Error fetching V9 dashboard data:', error);
+      // Set default data on error
+      setSubscriptionData({
+        active: false,
+        licenseCount: 0,
+        deviceCount: 0,
+        pricingTier: 'starter',
+        pricePerDevice: 1.99,
+        nextBilling: 'N/A',
+        status: 'inactive'
+      });
     }
   };
 
@@ -1119,6 +1261,20 @@ const Dashboard = () => {
           </div>
         )}
 
+        {/* Devices Section */}
+        {activeSection === 'devices' && (
+          <div className="p-6">
+            <DevicesSection userEmail={userData.email} companyName={userData.companyName} />
+          </div>
+        )}
+
+        {/* License Management Section */}
+        {activeSection === 'licenses' && (
+          <div className="p-6">
+            <LicenseManagement />
+          </div>
+        )}
+
         {/* Billing & Seats Section */}
         {activeSection === 'billing' && (
           <div className="p-6">
@@ -1130,8 +1286,19 @@ const Dashboard = () => {
           </div>
         )}
 
+        {/* Settings Section */}
+        {activeSection === 'settings' && (
+          <div className="p-6">
+            <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+              <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Settings</h3>
+              <p className="text-gray-500">Account and system settings will be available here</p>
+            </div>
+          </div>
+        )}
+
         {/* Other sections placeholder */}
-        {activeSection !== 'dashboard' && activeSection !== 'billing' && (
+        {!['dashboard', 'devices', 'licenses', 'billing', 'settings'].includes(activeSection) && (
           <div className="p-6">
             <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
               <h3 className="text-lg font-medium text-gray-900 mb-2">
