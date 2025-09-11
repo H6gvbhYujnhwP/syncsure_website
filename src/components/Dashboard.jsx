@@ -176,16 +176,6 @@ const DownloadsSection = ({ userEmail }) => {
     </div>
   );
 };
-        console.log('V9 builds endpoint response:', data);
-        setBuilds([]);
-      }
-    } catch (error) {
-      console.error('Error fetching V9 builds:', error);
-      setBuilds([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Manual refresh function
   const handleRefresh = () => {
